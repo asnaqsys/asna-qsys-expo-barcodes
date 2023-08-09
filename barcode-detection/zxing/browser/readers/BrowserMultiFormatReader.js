@@ -1,0 +1,30 @@
+import DecodeHintType from '../../core/DecodeHintType.js';
+import MultiFormatReader from '../../core/MultiFormatReader.js';
+import { BrowserCodeReader } from './BrowserCodeReader.js';
+export class BrowserMultiFormatReader extends BrowserCodeReader {
+    set possibleFormats(formats) {
+        this.hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+        this.reader.setHints(this.hints);
+    }
+    constructor(hints, options) {
+        const reader = new MultiFormatReader();
+        reader.setHints(hints);
+        super(reader, hints, options);
+        this.reader = reader;
+    }
+    /**
+     * Overwrite decodeBitmap to call decodeWithState, which will pay
+     * attention to the hints set in the constructor function
+     */
+    decodeBitmap(binaryBitmap) {
+        return this.reader.decodeWithState(binaryBitmap);
+    }
+    /**
+     * Allows to change hints in runtime.
+     */
+    setHints(hints) {
+        this.hints = hints;
+        this.reader.setHints(this.hints);
+    }
+}
+//# sourceMappingURL=BrowserMultiFormatReader.js.map

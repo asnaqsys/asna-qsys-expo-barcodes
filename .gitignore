@@ -1,0 +1,8 @@
+# Visual Studio cache/options directory
+.vs/
+
+# MacOS cache/options directory
+**/.DS_Store
+
+# Visual Studio Code cache/options directory
+.vscode/*
