@@ -1,0 +1,76 @@
+/*-------------------------------------------*\
+    DDS Barcode field related styles.
+
+\*-------------------------------------------*/
+.dds-field-barcode-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.25em;
+}
+
+.dds-field-barcode-input {
+    width: inherit;
+}
+
+.dds-field-barcode-button {
+    background-color:white;
+    cursor: pointer;
+    border-radius: 2px;
+    margin: 0px;
+    border: 0px;
+    text-decoration: none;
+    flex-basis: 10%;
+}
+
+.dds-field-barcode-button-image {
+    pointer-events: none;
+    background-color:white;
+    transform: scale(1.3);
+}
+
+.dds-field-barcode-video-frame {
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" stroke="%23000" stroke-linecap="round" stroke-linejoin="round" fill="%23fff" fill-rule="evenodd"><path d="M.2501 2.5L.25.2501 2.75.25M17.7499 2.5L17.75.2501 15.25.25m-14.9999 15L.25 17.4999l2.5.0001m12.75-.0001l2.2499.0001.0001-2.5" fill="none" stroke-linecap="square" stroke-linejoin="miter" stroke-width=".5"/><path d="M1 8.7501h12.3855L17 8.75" fill="red" stroke="red"/></svg>');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width:100%;
+}
+
+.dds-field-barcode-video-containter {
+    display: flex;
+    width: calc(100% - 8rem);
+    justify-content: space-between;
+    gap: 0;
+    margin: 0;
+    padding-left: 4rem;
+    padding-right: 4rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.dds-field-barcode-video {
+    width: 100%;
+    height: 20rem;
+    background-color: #666;
+}
+
+.dds-field-barcode-controls {
+    flex-basis: 5%;
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.25em;
+    background-color: #666;
+}
+
+.dds-field-barcode-control-option {
+    background-color: whitesmoke;
+    cursor: pointer;
+    border-radius: 2px;
+    margin: 0px;
+    border: 0px;
+    text-decoration: none;
+    width: 2rem;
+    height: 2rem;
+}
