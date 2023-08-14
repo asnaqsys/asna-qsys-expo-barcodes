@@ -208,7 +208,14 @@ class Barcodes {
 
         scanFrame.appendChild(scanContainer);
 
-        form.insertBefore(scanFrame, scanFrame.nextSibling);
+        const row = targetInput.closest('div.dds-grid-row');
+        if (row && row.nextSibling) {
+            form.insertBefore(scanFrame, row.nextSibling);
+
+        }
+        else {
+            form.appendChild(scanFrame);
+        }
 
         const codeReader = new BrowserMultiFormatOneDReader();
         Barcodes.listVideoInputDevices().then(
