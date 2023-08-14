@@ -1,7 +1,10 @@
 export { theBarcodes as Barcodes };
 
 import { AsnaDataAttrName } from '../asna-data-attr.js';
+import { Base64 } from '../base-64.js';
 
+
+// https://github.com/zxing-js/browser 
 import { BrowserMultiFormatOneDReader } from './zxing/browser/readers/BrowserMultiFormatOneDReader.js';
 import { BrowserCodeReader } from './zxing/browser/readers/BrowserCodeReader.js';
 
@@ -22,14 +25,19 @@ class Barcodes {
 
         for (let i = 0, l = elements.length; i < l; i++) {
             const input = elements[i];
-
-            const barcodeOptions = input.getAttribute(AsnaDataAttrName.DETECT_BARCODE);
-            Barcodes.CreateComponent(input, {} ); // TO-DO: decode barcodeOptions and json de-serialize.
-            // Note: no need to remove AsnaDataAttrName.DETECT_BARCODE, AsnaDataAttrName.VALUES_TEXT, etc. (input was replaced).
+            const encOptions = input.getAttribute(AsnaDataAttrName.DETECT_BARCODE);
+            try {
+                const options = JSON.parse(Base64.decode(encOptions));
+                input.removeAttribute(AsnaDataAttrName.DETECT_BARCODE);
+                Barcodes.createComponent(input, options);
+            }
+            catch (ex) {
+                // alert(ex);
+            }
         }        
     }
 
-    static CreateComponent(input, options){
+    static createComponent(input, options){
         const div = document.createElement('div');
         Barcodes.copyNonInputAttributes(div, input);
         div.className = 'dds-field-barcode-container';
@@ -115,9 +123,13 @@ class Barcodes {
     }
 
     static handleScanButtonClick(e) {
-        const btn = e.target;
+        const target = e.target;
 
-        if (!btn || !btn._asna) { return };    
+        if (!target) { return };    
+
+        let btn = (target.tagName === 'button' && target.className === 'button.dds-field-barcode-button' ) ? target :
+            target.closest('button.dds-field-barcode-button');
+        if (!btn._asna) { return };    
 
         const divContainer = btn.parentNode;
         const divRow = divContainer.parentNode;
