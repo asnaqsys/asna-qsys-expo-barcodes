@@ -1,4 +1,4 @@
-import DataMatrixReader from '../../core/datamatrix.js';
+import DataMatrixReader from '../../core/datamatrix/DataMatrixReader.js';
 import { BrowserCodeReader } from './BrowserCodeReader.js';
 /**
  * QR Code reader to use from browser.

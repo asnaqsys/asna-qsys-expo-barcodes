@@ -5,8 +5,13 @@ import { Base64 } from '../base-64.js';
 
 
 // https://github.com/zxing-js/browser 
-import { BrowserMultiFormatOneDReader } from './zxing/browser/readers/BrowserMultiFormatOneDReader.js';
+import { BrowserAztecCodeReader } from './zxing/browser/readers/BrowserAztecCodeReader.js';
 import { BrowserCodeReader } from './zxing/browser/readers/BrowserCodeReader.js';
+import { BrowserDatamatrixCodeReader } from './zxing/browser/readers/BrowserDatamatrixCodeReader.js';
+import { BrowserMultiFormatOneDReader } from './zxing/browser/readers/BrowserMultiFormatOneDReader.js';
+import { BrowserMultiFormatReader } from './zxing/browser/readers/BrowserMultiFormatReader.js';
+import { BrowserQRCodeReader } from './zxing/browser/readers/BrowserQRCodeReader.js';
+import { BrowserPDF417Reader } from './zxing/browser/readers/BrowserPDF417Reader.js';
 
 const INPUT_ATTRIBUTES = [
     'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength', 'name', 'pattern', 'placeholder', 'required', 'size', 'tabindex', 'title', 'value'
@@ -83,7 +88,7 @@ class Barcodes {
             inputField.setAttribute('disabled', true);
         }
         else {
-            btnScan._asna = { input: inputField };
+            btnScan._asna = { input: inputField, hints: options.HintFormats };
             btnScan.addEventListener('click', Barcodes.handleScanButtonClick);
         }
 
@@ -129,12 +134,9 @@ class Barcodes {
 
         let btn = (target.tagName === 'button' && target.className === 'button.dds-field-barcode-button' ) ? target :
             target.closest('button.dds-field-barcode-button');
-        if (!btn._asna) { return };    
+        if (!btn._asna || !btn._asna.input ) { return };    
 
-        const divContainer = btn.parentNode;
-        const divRow = divContainer.parentNode;
-        const form = divRow.parentNode;
-
+        const form = btn._asna.input.form;
         Barcodes.scanStart(form, btn, -1);
     }
 
@@ -188,6 +190,7 @@ class Barcodes {
         }
 
         const targetInput = btn._asna.input;
+        const hintFormats = btn._asna.hints;
 
         targetInput.setAttribute('value', '');
 
@@ -209,15 +212,15 @@ class Barcodes {
         scanFrame.appendChild(scanContainer);
 
         const row = targetInput.closest('div.dds-grid-row');
-        if (row && row.nextSibling) {
-            form.insertBefore(scanFrame, row.nextSibling);
-
+        if (row && row.nextElementSibling) {
+            const parent = row.parentElement;
+            parent.insertBefore(scanFrame, row.nextElementSibling);
         }
         else {
             form.appendChild(scanFrame);
         }
 
-        const codeReader = new BrowserMultiFormatOneDReader();
+        const codeReader = Barcodes.createCodeReader(hintFormats);
         Barcodes.listVideoInputDevices().then(
             (videoDevices) => {
                 if ( !videoDevices || ! videoDevices.length ) {
@@ -259,6 +262,50 @@ class Barcodes {
         });
     }
 
+    static createCodeReader(hintFormats) {
+        if (!hintFormats || hintFormats.length === 0) {
+            return new new BrowserMultiFormatReader();
+        }
+
+        // See ..\zxing\core\BarcodeFormat.js
+        if (hintFormats.includes(0)) {
+            return new BrowserAztecCodeReader(hintFormats);
+        }
+
+        if (hintFormats.includes(5)) {
+            return new BrowserDatamatrixCodeReader(hintFormats);
+        }
+
+        if (hintFormats.includes(1)  || //  CODABAR 1D
+            hintFormats.includes(2)  || //  Code 39 1D
+            hintFormats.includes(3)  || //  Code 93 1D
+            hintFormats.includes(4)  || //  Code 128 1D
+            hintFormats.includes(6)  || //  EAN-8 1D
+            hintFormats.includes(7)  || //  EAN-13 1D
+            hintFormats.includes(8)  || //  ITF (Interleaved Two of Five) 1D
+            hintFormats.includes(12) || //  RSS 14
+            hintFormats.includes(13) || //  RSS EXPANDED
+            hintFormats.includes(14) || //  UPC-A 1D format.
+            hintFormats.includes(15) || //  UPC-E 1D format.
+            hintFormats.includes(16)) { // UPC/EAN extension format. Not a stand-alone format.
+            return new BrowserMultiFormatOneDReader(hintFormats);
+        }
+
+        if (hintFormats.includes(5)) {
+            return new BrowserDatamatrixCodeReader(hintFormats);
+        }
+
+        if (hintFormats.includes(11)) {
+            return new BrowserQRCodeReader(hintFormats);
+        }
+
+        if (hintFormats.includes(10)) {
+            return new BrowserPDF417Reader(hintFormats);
+        }
+
+        return new BrowserMultiFormatReader(hintFormats);
+    }
+
     static scanEnd( videoControls, form) {
         console.assert(form, 'Unexpected form null or undefined');
 
@@ -271,8 +318,8 @@ class Barcodes {
         if ( videoElement && videoElement._asna && videoElement._asna.scanTimeoutID ) {
             clearTimeout(videoElement._asna.scanTimeoutID);
         }
-        if ( scanFrame ) {
-            form.removeChild(scanFrame);
+        if (scanFrame && scanFrame.parentNode) {
+            scanFrame.parentNode.removeChild(scanFrame);
         }
     }
 

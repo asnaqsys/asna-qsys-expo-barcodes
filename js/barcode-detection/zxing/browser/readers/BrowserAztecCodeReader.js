@@ -1,5 +1,5 @@
 import AztecCodeReader from '../../core/aztec/AztecReader.js';
-import BrowserCodeReader from './BrowserCodeReader.js';
+import { BrowserCodeReader } from './BrowserCodeReader.js';
 /**
  * Aztec Code reader to use from browser.
  *
