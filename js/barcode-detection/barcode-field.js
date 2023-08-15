@@ -14,7 +14,7 @@ import { BrowserQRCodeReader } from './zxing/browser/readers/BrowserQRCodeReader
 import { BrowserPDF417Reader } from './zxing/browser/readers/BrowserPDF417Reader.js';
 
 const INPUT_ATTRIBUTES = [
-    'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength', 'name', 'pattern', 'placeholder', 'required', 'size', 'tabindex', 'title', 'value'
+    'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength', 'name', 'pattern', 'placeholder', 'required', 'size', 'tabindex', 'title', 'value', 'data-asna-position-cursor'
 ];
 
 const SCANNING_TIMEOUT = 20000;
