@@ -12,19 +12,23 @@ To install on existing Monarch Base Application:
       "provider": "jsdelivr",
       "library": "asnaqsys/asna-qsys-expo-web-content@4.0.7",
       "destination": "wwwroot/lib/asna-expo",
-      "files": ["**/*", "!.github/**/*", "!css/*.min.*", "!js/*.min.*", "!js/**/*.min.*"
+      "files": [
+        "**/*", "!.github/**/*", "!css/*.min.*", "!js/*.min.*", "!js/**/*.min.*"
       ]
     },
     {
       "provider": "jsdelivr",
       "library": "asnaqsys/asna-qsys-expo-barcodes@latest",
       "destination": "wwwroot/lib/asna-expo",
-      "files": ["**/*", "!.github/**/*", "!css/*.min.*", "!js/*.min.*", "!js/**/*.min.*"
+      "files": [
+        "**/*", "!.github/**/*", "!css/*.min.*", "!js/*.min.*", "!js/**/*.min.*", "!js/*.md"
       ]
     }
   ]
 }
 ```
+
+   >Note: Library `asnaqsys/asna-qsys-expo-barcodes` is now requested (same destination as asnaqsys/asna-qsys-expo-web-content).
 
 2. Add reference to the library (_Layout.cshtml) :
 ```html
@@ -56,8 +60,10 @@ To install on existing Monarch Base Application:
 </html>
 ```
 
-Notice: 
+>Notes: 
 
    a) `<link rel="stylesheet" href="~/lib/asna-expo/css/barcodes.css" />`
+
    b) `import { Barcodes } from '../lib/asna-expo/js/barcode-detection/barcode-field.js';`
+
    c) `Barcodes.init({ formId: 'MonarchForm' });`
