@@ -13,6 +13,8 @@ import { BrowserMultiFormatReader } from './zxing/browser/readers/BrowserMultiFo
 import { BrowserQRCodeReader } from './zxing/browser/readers/BrowserQRCodeReader.js';
 import { BrowserPDF417Reader } from './zxing/browser/readers/BrowserPDF417Reader.js';
 
+import BarcodeFormat from './zxing/core/BarcodeFormat.js';
+
 const INPUT_ATTRIBUTES = [
     'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength', 'name', 'pattern', 'placeholder', 'required', 'size', 'tabindex', 'title', 'value', 'data-asna-position-cursor'
 ];
@@ -267,39 +269,38 @@ class Barcodes {
             return new new BrowserMultiFormatReader();
         }
 
-        // See ..\zxing\core\BarcodeFormat.js
-        if (hintFormats.includes(0)) {
+        if (hintFormats.includes(BarcodeFormat.AZTEC)) {
             return new BrowserAztecCodeReader(hintFormats);
         }
 
-        if (hintFormats.includes(5)) {
+        if (hintFormats.includes(BarcodeFormat.DATA_MATRIX)) {
             return new BrowserDatamatrixCodeReader(hintFormats);
         }
 
-        if (hintFormats.includes(1)  || //  CODABAR 1D
-            hintFormats.includes(2)  || //  Code 39 1D
-            hintFormats.includes(3)  || //  Code 93 1D
-            hintFormats.includes(4)  || //  Code 128 1D
-            hintFormats.includes(6)  || //  EAN-8 1D
-            hintFormats.includes(7)  || //  EAN-13 1D
-            hintFormats.includes(8)  || //  ITF (Interleaved Two of Five) 1D
-            hintFormats.includes(12) || //  RSS 14
-            hintFormats.includes(13) || //  RSS EXPANDED
-            hintFormats.includes(14) || //  UPC-A 1D format.
-            hintFormats.includes(15) || //  UPC-E 1D format.
-            hintFormats.includes(16)) { // UPC/EAN extension format. Not a stand-alone format.
+        if (hintFormats.includes(BarcodeFormat.CODABAR) ||
+            hintFormats.includes(BarcodeFormat.CODE_39) || 
+            hintFormats.includes(BarcodeFormat.CODE_93) || 
+            hintFormats.includes(BarcodeFormat.CODE_128) || 
+            hintFormats.includes(BarcodeFormat.EAN_8) ||
+            hintFormats.includes(BarcodeFormat.EAN_13) ||
+            hintFormats.includes(BarcodeFormat.ITF) || 
+            hintFormats.includes(BarcodeFormat.RSS_14) || 
+            hintFormats.includes(BarcodeFormat.RSS_EXPANDED) ||
+            hintFormats.includes(BarcodeFormat.UPC_A) || 
+            hintFormats.includes(BarcodeFormat.UPC_E) || 
+            hintFormats.includes(BarcodeFormat.UPC_EAN_EXTENSION)) {
             return new BrowserMultiFormatOneDReader(hintFormats);
         }
 
-        if (hintFormats.includes(5)) {
+        if (hintFormats.includes(BarcodeFormat.DATA_MATRIX)) {
             return new BrowserDatamatrixCodeReader(hintFormats);
         }
 
-        if (hintFormats.includes(11)) {
+        if (hintFormats.includes(BarcodeFormat.QR_CODE)) {
             return new BrowserQRCodeReader(hintFormats);
         }
 
-        if (hintFormats.includes(10)) {
+        if (hintFormats.includes(BarcodeFormat.PDF_417)) {
             return new BrowserPDF417Reader(hintFormats);
         }
 
