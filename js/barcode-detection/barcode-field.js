@@ -14,6 +14,7 @@ import { BrowserQRCodeReader } from './zxing/browser/readers/BrowserQRCodeReader
 import { BrowserPDF417Reader } from './zxing/browser/readers/BrowserPDF417Reader.js';
 
 import BarcodeFormat from './zxing/core/BarcodeFormat.js';
+import DecodeHintType from './zxing/core/DecodeHintType.js';
 
 const INPUT_ATTRIBUTES = [
     'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength', 'name', 'pattern', 'placeholder', 'required', 'size', 'tabindex', 'title', 'value', 'data-asna-position-cursor'
@@ -269,12 +270,17 @@ class Barcodes {
             return new new BrowserMultiFormatReader();
         }
 
+        const hintsMap = new Map();
+
+        hintsMap.set(DecodeHintType.POSSIBLE_FORMATS, hintFormats);
+        // hintsMap.set(DecodeHintType.TRY_HARDER, true);
+
         if (hintFormats.includes(BarcodeFormat.AZTEC)) {
-            return new BrowserAztecCodeReader(hintFormats);
+            return new BrowserAztecCodeReader(hintsMap);
         }
 
         if (hintFormats.includes(BarcodeFormat.DATA_MATRIX)) {
-            return new BrowserDatamatrixCodeReader(hintFormats);
+            return new BrowserDatamatrixCodeReader(hintsMap);
         }
 
         if (hintFormats.includes(BarcodeFormat.CODABAR) ||
@@ -289,22 +295,22 @@ class Barcodes {
             hintFormats.includes(BarcodeFormat.UPC_A) || 
             hintFormats.includes(BarcodeFormat.UPC_E) || 
             hintFormats.includes(BarcodeFormat.UPC_EAN_EXTENSION)) {
-            return new BrowserMultiFormatOneDReader(hintFormats);
+            return new BrowserMultiFormatOneDReader(hintsMap);
         }
 
         if (hintFormats.includes(BarcodeFormat.DATA_MATRIX)) {
-            return new BrowserDatamatrixCodeReader(hintFormats);
+            return new BrowserDatamatrixCodeReader(hintsMap);
         }
 
         if (hintFormats.includes(BarcodeFormat.QR_CODE)) {
-            return new BrowserQRCodeReader(hintFormats);
+            return new BrowserQRCodeReader(hintsMap);
         }
 
         if (hintFormats.includes(BarcodeFormat.PDF_417)) {
-            return new BrowserPDF417Reader(hintFormats);
+            return new BrowserPDF417Reader(hintsMap);
         }
 
-        return new BrowserMultiFormatReader(hintFormats);
+        return new BrowserMultiFormatReader(hintsMap);
     }
 
     static scanEnd( videoControls, form) {
