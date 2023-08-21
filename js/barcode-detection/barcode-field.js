@@ -267,7 +267,7 @@ class Barcodes {
 
     static createCodeReader(hintFormats) {
         if (!hintFormats || hintFormats.length === 0) {
-            return new new BrowserMultiFormatReader();
+            return new BrowserMultiFormatReader();
         }
 
         const hintsMap = new Map();
