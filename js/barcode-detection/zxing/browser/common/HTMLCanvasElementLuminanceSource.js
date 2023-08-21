@@ -128,4 +128,3 @@ export class HTMLCanvasElementLuminanceSource extends LuminanceSource {
         return this;
     }
 }
-//# sourceMappingURL=HTMLCanvasElementLuminanceSource.js.map

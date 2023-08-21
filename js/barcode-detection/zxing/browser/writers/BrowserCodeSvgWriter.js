@@ -137,4 +137,3 @@ class BrowserCodeSvgWriter {
     }
 }
 export { BrowserCodeSvgWriter };
-//# sourceMappingURL=BrowserCodeSvgWriter.js.map

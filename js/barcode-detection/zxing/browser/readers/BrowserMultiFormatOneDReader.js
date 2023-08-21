@@ -13,4 +13,3 @@ export class BrowserMultiFormatOneDReader extends BrowserCodeReader {
         super(new MultiFormatOneDReader(hints), hints, options);
     }
 }
-//# sourceMappingURL=BrowserMultiFormatOneDReader.js.map

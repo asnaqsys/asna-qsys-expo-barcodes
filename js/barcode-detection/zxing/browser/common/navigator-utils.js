@@ -16,4 +16,3 @@ function isMediaDevicesSupported() {
 export function canEnumerateDevices() {
     return !!(isMediaDevicesSupported() && navigator.mediaDevices.enumerateDevices);
 }
-//# sourceMappingURL=navigator-utils.js.map

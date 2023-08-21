@@ -11,4 +11,3 @@ export class BrowserQRCodeReader extends BrowserCodeReader {
         super(new QRCodeReader(), hints, options);
     }
 }
-//# sourceMappingURL=BrowserQRCodeReader.js.map

@@ -27,4 +27,3 @@ export class BrowserMultiFormatReader extends BrowserCodeReader {
         this.reader.setHints(this.hints);
     }
 }
-//# sourceMappingURL=BrowserMultiFormatReader.js.map

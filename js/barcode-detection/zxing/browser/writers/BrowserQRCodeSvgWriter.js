@@ -123,4 +123,3 @@ class BrowserQRCodeSvgWriter {
     }
 }
 export { BrowserQRCodeSvgWriter };
-//# sourceMappingURL=BrowserQRCodeSvgWriter.js.map
