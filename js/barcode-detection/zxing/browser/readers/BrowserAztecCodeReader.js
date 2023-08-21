@@ -14,4 +14,3 @@ export class BrowserAztecCodeReader extends BrowserCodeReader {
         super(new AztecCodeReader(), hints, options);
     }
 }
-//# sourceMappingURL=BrowserAztecCodeReader.js.map

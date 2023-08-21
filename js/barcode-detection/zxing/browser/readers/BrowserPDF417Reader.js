@@ -11,4 +11,3 @@ export class BrowserPDF417Reader extends BrowserCodeReader {
         super(new PDF417Reader(), hints, options);
     }
 }
-//# sourceMappingURL=BrowserPDF417Reader.js.map

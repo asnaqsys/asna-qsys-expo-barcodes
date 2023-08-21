@@ -11,4 +11,3 @@ export class BrowserDatamatrixCodeReader extends BrowserCodeReader {
         super(new DataMatrixReader(), hints, options);
     }
 }
-//# sourceMappingURL=BrowserDatamatrixCodeReader.js.map

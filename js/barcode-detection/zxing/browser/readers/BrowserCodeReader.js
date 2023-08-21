@@ -865,4 +865,3 @@ export class BrowserCodeReader {
         return stream;
     }
 }
-//# sourceMappingURL=BrowserCodeReader.js.map
