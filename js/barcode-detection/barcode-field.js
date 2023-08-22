@@ -175,8 +175,10 @@ class Barcodes {
     static async decodeFromVideoDevice(codeReader, selectedDeviceId, videoElement, form, targetInput ) {
         return await codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, error, controls) => {
             if ( result ) {
-               targetInput.setAttribute('value', result.text);
-               Barcodes.scanEnd(controls, form);
+                targetInput.setAttribute('value', result.text);
+                const audio = new Audio('/lib/asna-expo/audio/barcode-identified-alarm.mp3');
+                audio.play();
+                Barcodes.scanEnd(controls, form);
             }
             else if ( controls ) {
                 if ( videoElement._asna && ! videoElement._asna.controls ) {
