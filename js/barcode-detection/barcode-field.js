@@ -3,8 +3,6 @@ export { theBarcodes as Barcodes };
 import { AsnaDataAttrName } from '../asna-data-attr.js';
 import { Base64 } from '../base-64.js';
 
-
-// https://github.com/zxing-js/browser 
 import { BrowserAztecCodeReader } from './zxing/browser/readers/BrowserAztecCodeReader.js';
 import { BrowserCodeReader } from './zxing/browser/readers/BrowserCodeReader.js';
 import { BrowserDatamatrixCodeReader } from './zxing/browser/readers/BrowserDatamatrixCodeReader.js';
