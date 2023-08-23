@@ -18,7 +18,7 @@ const INPUT_ATTRIBUTES = [
     'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength', 'name', 'pattern', 'placeholder', 'required', 'size', 'tabindex', 'title', 'value', 'data-asna-position-cursor'
 ];
 
-const SCANNING_TIMEOUT = 20000;
+const DEFAULT_SCANNING_TIMEOUT_SECONDS = 20;
 const SWITCH_VIDEO_CAMERA_WAIT = 250;
 
 class Barcodes {
@@ -89,7 +89,7 @@ class Barcodes {
             inputField.setAttribute('disabled', true);
         }
         else {
-            btnScan._asna = { input: inputField, hints: options.HintFormats };
+            btnScan._asna = { input: inputField, hints: options.HintFormats, timeout: options.scanningTimeoutSeconds };
             btnScan.addEventListener('click', Barcodes.handleScanButtonClick);
         }
 
@@ -194,6 +194,9 @@ class Barcodes {
 
         const targetInput = btn._asna.input;
         const hintFormats = btn._asna.hints;
+        const timeoutSeconds = (typeof btn._asna.timeout === 'undefined') ?
+            DEFAULT_SCANNING_TIMEOUT_SECONDS :
+            btn._asna.timeout;
 
         targetInput.setAttribute('value', '');
 
@@ -226,37 +229,39 @@ class Barcodes {
         const codeReader = Barcodes.createCodeReader(hintFormats);
         Barcodes.listVideoInputDevices().then(
             (videoDevices) => {
-                if ( !videoDevices || ! videoDevices.length ) {
+                if (!videoDevices || !videoDevices.length) {
                     alert('Failed to find video camera to start scanning.');
                     Barcodes.scanEnd(null, form);
                 }
                 else {
-                    toolboxControls.appendChild( Barcodes.createScanToolboxOption( form, btn, 0, 'x', 'Stop scan') );
+                    toolboxControls.appendChild(Barcodes.createScanToolboxOption(form, btn, 0, 'x', 'Stop scan'));
 
                     let deviceIndex = 0;
-                    if ( videoDevices.length > 1){
-                        for (let i=0; i<videoDevices.length; i++) {
-                            toolboxControls.appendChild( Barcodes.createScanToolboxOption(form, btn, i+1, `${i+1}`, videoDevices[i].label));
+                    if (videoDevices.length > 1) {
+                        for (let i = 0; i < videoDevices.length; i++) {
+                            toolboxControls.appendChild(Barcodes.createScanToolboxOption(form, btn, i + 1, `${i + 1}`, videoDevices[i].label));
 
-                            if ( preferredDeviceIndex < 0 && 
-                                ( videoDevices[i].label.includes('Back') || videoDevices[i].label.includes('back') ) ) {
+                            if (preferredDeviceIndex < 0 &&
+                                (videoDevices[i].label.includes('Back') || videoDevices[i].label.includes('back'))) {
                                 deviceIndex = i;
                             }
                         }
                     }
-                    if ( preferredDeviceIndex >= 0 && preferredDeviceIndex < videoDevices.length) {
+                    if (preferredDeviceIndex >= 0 && preferredDeviceIndex < videoDevices.length) {
                         deviceIndex = preferredDeviceIndex;
                     }
                     const selectedDeviceId = videoDevices[deviceIndex].deviceId;
                     videoElement._asna = {};
                     Barcodes.decodeFromVideoDevice(codeReader, selectedDeviceId, videoElement, form, targetInput);
-                
-                    videoElement._asna.scanTimeoutID = setTimeout(() => { 
-                        if ( videoElement._asna.controls ) {
-                            Barcodes.scanEnd(videoElement._asna.controls, form);
-                        }
-                    }, 
-                    SCANNING_TIMEOUT);
+
+                    if (timeoutSeconds > 0) {
+                        videoElement._asna.scanTimeoutID = setTimeout(() => {
+                            if (videoElement._asna.controls) {
+                                Barcodes.scanEnd(videoElement._asna.controls, form);
+                            }
+                        },
+                        timeoutSeconds * 1000);
+                    }
                 }
             }
         ).catch((error)=>{
