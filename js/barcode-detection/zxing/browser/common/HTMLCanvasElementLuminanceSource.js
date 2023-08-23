@@ -7,7 +7,7 @@ export class HTMLCanvasElementLuminanceSource extends LuminanceSource {
     canvas;
     static DEGREE_TO_RADIANS = Math.PI / 180;
     static makeBufferFromCanvasImageData(canvas) {
-        const canvasCtx = canvas.getContext('2d');
+        const canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
         if (!canvasCtx) {
             throw new Error('Couldn\'t get canvas context.');
         }
@@ -116,7 +116,7 @@ export class HTMLCanvasElementLuminanceSource extends LuminanceSource {
         const newHeight = Math.ceil(Math.abs(Math.sin(angleRadians)) * width + Math.abs(Math.cos(angleRadians)) * height);
         tempCanvasElement.width = newWidth;
         tempCanvasElement.height = newHeight;
-        const tempContext = tempCanvasElement.getContext('2d');
+        const tempContext = tempCanvasElement.getContext('2d', { willReadFrequently: true });
         if (!tempContext) {
             throw new Error('Could not create a Canvas Context element.');
         }
