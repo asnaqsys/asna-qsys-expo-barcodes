@@ -8,19 +8,7 @@ const svgNs = 'http://www.w3.org/2000/svg';
 /**/
 class BrowserCodeSvgWriter {
     /**
-     * Default quiet zone in pixels.
-     */
-    static QUIET_ZONE_SIZE = 4;
-    /**
-     * SVG markup NameSpace
-     */
-    static SVG_NS = 'http://www.w3.org/2000/svg';
-    /**
-     * A HTML container element for the image.
-     */
-    containerElement;
-    /**
-     * Constructs. 😉
+     * Constructs. ðŸ˜‰
      */
     constructor(containerElement) {
         if (typeof containerElement === 'string') {
@@ -136,4 +124,12 @@ class BrowserCodeSvgWriter {
         return svgElement;
     }
 }
+/**
+ * Default quiet zone in pixels.
+ */
+BrowserCodeSvgWriter.QUIET_ZONE_SIZE = 4;
+/**
+ * SVG markup NameSpace
+ */
+BrowserCodeSvgWriter.SVG_NS = 'http://www.w3.org/2000/svg';
 export { BrowserCodeSvgWriter };

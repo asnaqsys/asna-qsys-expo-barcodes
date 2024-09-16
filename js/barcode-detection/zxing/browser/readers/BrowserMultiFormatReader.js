@@ -2,15 +2,15 @@ import DecodeHintType from '../../core/DecodeHintType.js';
 import MultiFormatReader from '../../core/MultiFormatReader.js';
 import { BrowserCodeReader } from './BrowserCodeReader.js';
 export class BrowserMultiFormatReader extends BrowserCodeReader {
-    set possibleFormats(formats) {
-        this.hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
-        this.reader.setHints(this.hints);
-    }
     constructor(hints, options) {
         const reader = new MultiFormatReader();
         reader.setHints(hints);
         super(reader, hints, options);
         this.reader = reader;
+    }
+    set possibleFormats(formats) {
+        this.hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+        this.reader.setHints(this.hints);
     }
     /**
      * Overwrite decodeBitmap to call decodeWithState, which will pay
