@@ -4,10 +4,20 @@ import LuminanceSource  from '../../core/LuminanceSource.js';
 
 /**/
 export class HTMLCanvasElementLuminanceSource extends LuminanceSource {
-    canvas;
-    static DEGREE_TO_RADIANS = Math.PI / 180;
+    constructor(canvas) {
+        super(canvas.width, canvas.height);
+        this.canvas = canvas;
+        this.tempCanvasElement = null;
+        this.buffer = HTMLCanvasElementLuminanceSource.makeBufferFromCanvasImageData(canvas);
+    }
     static makeBufferFromCanvasImageData(canvas) {
-        const canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
+        let canvasCtx;
+        try {
+            canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
+        }
+        catch (e) {
+            canvasCtx = canvas.getContext('2d');
+        }
         if (!canvasCtx) {
             throw new Error('Couldn\'t get canvas context.');
         }
@@ -39,18 +49,11 @@ export class HTMLCanvasElementLuminanceSource extends LuminanceSource {
         }
         return grayscaleBuffer;
     }
-    buffer;
-    tempCanvasElement = null;
-    constructor(canvas) {
-        super(canvas.width, canvas.height);
-        this.canvas = canvas;
-        this.buffer = HTMLCanvasElementLuminanceSource.makeBufferFromCanvasImageData(canvas);
-    }
     getRow(y /*int*/, row) {
         if (y < 0 || y >= this.getHeight()) {
             throw new IllegalArgumentException('Requested row is outside the image: ' + y);
         }
-        const width /*int*/ = this.getWidth();
+        const width = this.getWidth();
         const start = y * width;
         if (row === null) {
             row = this.buffer.slice(start, start + width);
@@ -116,7 +119,7 @@ export class HTMLCanvasElementLuminanceSource extends LuminanceSource {
         const newHeight = Math.ceil(Math.abs(Math.sin(angleRadians)) * width + Math.abs(Math.cos(angleRadians)) * height);
         tempCanvasElement.width = newWidth;
         tempCanvasElement.height = newHeight;
-        const tempContext = tempCanvasElement.getContext('2d', { willReadFrequently: true });
+        const tempContext = tempCanvasElement.getContext('2d');
         if (!tempContext) {
             throw new Error('Could not create a Canvas Context element.');
         }
@@ -128,3 +131,4 @@ export class HTMLCanvasElementLuminanceSource extends LuminanceSource {
         return this;
     }
 }
+HTMLCanvasElementLuminanceSource.DEGREE_TO_RADIANS = Math.PI / 180;

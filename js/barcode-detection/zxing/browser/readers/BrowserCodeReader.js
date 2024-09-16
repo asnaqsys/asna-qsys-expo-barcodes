@@ -1,3 +1,13 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
 import ArgumentException from '../../core/ArgumentException.js';
 import BinaryBitmap from '../../core/BinaryBitmap.js';
 import ChecksumException from '../../core/ChecksumException.js';
@@ -7,6 +17,7 @@ import HybridBinarizer from '../../core/common/HybridBinarizer.js';
 import NotFoundException from '../../core/NotFoundException.js';
 import { HTMLCanvasElementLuminanceSource } from '../common/HTMLCanvasElementLuminanceSource.js';
 import { canEnumerateDevices, hasNavigator } from '../common/navigator-utils.js';
+
 const defaultOptions = {
     delayBetweenScanAttempts: 500,
     delayBetweenScanSuccess: 500,
@@ -16,8 +27,16 @@ const defaultOptions = {
  * Base class for browser code reader.
  */
 export class BrowserCodeReader {
-    reader;
-    hints;
+    /**
+     * Creates an instance of BrowserCodeReader.
+     * @param {Reader} reader The reader instance to decode the barcode
+     * @param hints Holds the hints the user sets for the Reader.
+     */
+    constructor(reader, hints = new Map(), options = {}) {
+        this.reader = reader;
+        this.hints = hints;
+        this.options = Object.assign(Object.assign({}, defaultOptions), options);
+    }
     /**
      * Allows to change the possible formats the decoder should
      * search for while scanning some image. Useful for changing
@@ -47,12 +66,14 @@ export class BrowserCodeReader {
      *
      * @experimental This doesn't work across all browsers and is still a Draft.
      */
-    static async mediaStreamSetTorch(track, onOff) {
-        await track.applyConstraints({
-            advanced: [{
+    static mediaStreamSetTorch(track, onOff) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield track.applyConstraints({
+                advanced: [{
                     fillLightMode: onOff ? 'flash' : 'off',
                     torch: onOff ? true : false,
                 }],
+            });
         });
     }
     /**
@@ -172,7 +193,7 @@ export class BrowserCodeReader {
         if (img.naturalWidth === 0) {
             return false;
         }
-        // No other way of checking: assume it’s ok.
+        // No other way of checking: assume itâ€™s ok.
         return true;
     }
     /**
@@ -207,7 +228,7 @@ export class BrowserCodeReader {
         throw new Error('Couldn\'t find the Source\'s dimensions!');
     }
     /**
-     * 🖌 Prepares the canvas for capture and scan frames.
+     * ðŸ–Œ Prepares the canvas for capture and scan frames.
      */
     static createCaptureCanvas(mediaElement) {
         if (!mediaElement) {
@@ -228,26 +249,28 @@ export class BrowserCodeReader {
      * Just tries to play the video and logs any errors.
      * The play call is only made is the video is not already playing.
      */
-    static async tryPlayVideo(videoElement) {
-        if (videoElement?.ended) {
-            // tslint:disable-next-line:no-console
-            console.error('Trying to play video that has ended.');
-            return false;
-        }
-        if (BrowserCodeReader.isVideoPlaying(videoElement)) {
-            // tslint:disable-next-line:no-console
-            console.warn('Trying to play video that is already playing.');
-            return true;
-        }
-        try {
-            await videoElement.play();
-            return true;
-        }
-        catch (error) {
-            // tslint:disable-next-line:no-console
-            console.warn('It was not possible to play the video.', error);
-            return false;
-        }
+    static tryPlayVideo(videoElement) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (videoElement === null || videoElement === void 0 ? void 0 : videoElement.ended) {
+                // tslint:disable-next-line:no-console
+                console.error('Trying to play video that has ended.');
+                return false;
+            }
+            if (BrowserCodeReader.isVideoPlaying(videoElement)) {
+                // tslint:disable-next-line:no-console
+                console.warn('Trying to play video that is already playing.');
+                return true;
+            }
+            try {
+                yield videoElement.play();
+                return true;
+            }
+            catch (error) {
+                // tslint:disable-next-line:no-console
+                console.warn('It was not possible to play the video.', error);
+                return false;
+            }
+        });
     }
     /**
      * Creates a canvas and draws the current image frame from the media element on it.
@@ -256,7 +279,7 @@ export class BrowserCodeReader {
      */
     static createCanvasFromMediaElement(mediaElement) {
         const canvas = BrowserCodeReader.createCaptureCanvas(mediaElement);
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const ctx = canvas.getContext('2d');
         if (!ctx) {
             throw new Error('Couldn\'t find Canvas 2D Context.');
         }
@@ -280,37 +303,41 @@ export class BrowserCodeReader {
     /**
      * Lists all the available video input devices.
      */
-    static async listVideoInputDevices() {
-        if (!hasNavigator()) {
-            throw new Error('Can\'t enumerate devices, navigator is not present.');
-        }
-        if (!canEnumerateDevices()) {
-            throw new Error('Can\'t enumerate devices, method not supported.');
-        }
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = [];
-        for (const device of devices) {
-            const kind = device.kind === 'video' ? 'videoinput' : device.kind;
-            if (kind !== 'videoinput') {
-                continue;
+    static listVideoInputDevices() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!hasNavigator()) {
+                throw new Error('Can\'t enumerate devices, navigator is not present.');
             }
-            const deviceId = device.deviceId || device.id;
-            const label = device.label || `Video device ${videoDevices.length + 1}`;
-            const groupId = device.groupId;
-            const videoDevice = { deviceId, label, kind, groupId };
-            videoDevices.push(videoDevice);
-        }
-        return videoDevices;
+            if (!canEnumerateDevices()) {
+                throw new Error('Can\'t enumerate devices, method not supported.');
+            }
+            const devices = yield navigator.mediaDevices.enumerateDevices();
+            const videoDevices = [];
+            for (const device of devices) {
+                const kind = device.kind === 'video' ? 'videoinput' : device.kind;
+                if (kind !== 'videoinput') {
+                    continue;
+                }
+                const deviceId = device.deviceId || device.id;
+                const label = device.label || `Video device ${videoDevices.length + 1}`;
+                const groupId = device.groupId;
+                const videoDevice = { deviceId, label, kind, groupId };
+                videoDevices.push(videoDevice);
+            }
+            return videoDevices;
+        });
     }
     /**
      * Let's you find a device using it's Id.
      */
-    static async findDeviceById(deviceId) {
-        const devices = await BrowserCodeReader.listVideoInputDevices();
-        if (!devices) {
-            return;
-        }
-        return devices.find((x) => x.deviceId === deviceId);
+    static findDeviceById(deviceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const devices = yield BrowserCodeReader.listVideoInputDevices();
+            if (!devices) {
+                return;
+            }
+            return devices.find((x) => x.deviceId === deviceId);
+        });
     }
     /**
      * Unbinds a HTML video src property.
@@ -319,7 +346,7 @@ export class BrowserCodeReader {
         if (!videoElement) {
             return;
         }
-        // forgets about that element 😢
+        // forgets about that element ðŸ˜¢
         try {
             videoElement.srcObject = null;
         }
@@ -349,35 +376,37 @@ export class BrowserCodeReader {
      * @param element The video element.
      * @param callbackFn Callback invoked when the video is played.
      */
-    static async playVideoOnLoadAsync(element, timeout) {
-        // if canplay was already fired, we won't know when to play, so just give it a try
-        const isPlaying = await BrowserCodeReader.tryPlayVideo(element);
-        if (isPlaying) {
-            return true;
-        }
-        return new Promise((resolve, reject) => {
-            // waits 3 seconds or rejects.
-            const timeoutId = setTimeout(() => {
-                if (BrowserCodeReader.isVideoPlaying(element)) {
-                    // if video is playing then we had success, just ignore
-                    return;
-                }
-                reject(false);
-                element.removeEventListener('canplay', videoCanPlayListener);
-            }, timeout);
-            /**
-             * Should contain the current registered listener for video loaded-metadata,
-             * used to unregister that listener when needed.
-             */
-            const videoCanPlayListener = () => {
-                BrowserCodeReader.tryPlayVideo(element).then((hasPlayed) => {
-                    clearTimeout(timeoutId);
+    static playVideoOnLoadAsync(element, timeout) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // if canplay was already fired, we won't know when to play, so just give it a try
+            const isPlaying = yield BrowserCodeReader.tryPlayVideo(element);
+            if (isPlaying) {
+                return true;
+            }
+            return new Promise((resolve, reject) => {
+                // waits 3 seconds or rejects.
+                const timeoutId = setTimeout(() => {
+                    if (BrowserCodeReader.isVideoPlaying(element)) {
+                        // if video is playing then we had success, just ignore
+                        return;
+                    }
+                    reject(false);
                     element.removeEventListener('canplay', videoCanPlayListener);
-                    resolve(hasPlayed);
-                });
-            };
-            // both should be unregistered after called
-            element.addEventListener('canplay', videoCanPlayListener);
+                }, timeout);
+                /**
+                 * Should contain the current registered listener for video loaded-metadata,
+                 * used to unregister that listener when needed.
+                 */
+                const videoCanPlayListener = () => {
+                    BrowserCodeReader.tryPlayVideo(element).then((hasPlayed) => {
+                        clearTimeout(timeoutId);
+                        element.removeEventListener('canplay', videoCanPlayListener);
+                        resolve(hasPlayed);
+                    });
+                };
+                // both should be unregistered after called
+                element.addEventListener('canplay', videoCanPlayListener);
+            });
         });
     }
     /**
@@ -386,17 +415,14 @@ export class BrowserCodeReader {
      * @param stream The stream to be shown in the video element.
      * @param decodeFn A callback for the decode method.
      */
-    static async attachStreamToVideo(stream, preview, previewPlayTimeout = 5000) {
-        const videoElement = BrowserCodeReader.prepareVideoElement(preview);
-        BrowserCodeReader.addVideoSource(videoElement, stream);
-        await BrowserCodeReader.playVideoOnLoadAsync(videoElement, previewPlayTimeout);
-        return videoElement;
+    static attachStreamToVideo(stream, preview, previewPlayTimeout = 5000) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const videoElement = BrowserCodeReader.prepareVideoElement(preview);
+            BrowserCodeReader.addVideoSource(videoElement, stream);
+            yield BrowserCodeReader.playVideoOnLoadAsync(videoElement, previewPlayTimeout);
+            return videoElement;
+        });
     }
-    /**
-     * Keeps track to created media streams.
-     * @private there is no need this array to be accessible from outside.
-     */
-    static streamTracker = [];
     /**
      * Returns a Promise that resolves when the given image element loads.
      */
@@ -440,20 +466,6 @@ export class BrowserCodeReader {
         stream = undefined;
     }
     /**
-     * BrowserCodeReader specific configuration options.
-     */
-    options;
-    /**
-     * Creates an instance of BrowserCodeReader.
-     * @param {Reader} reader The reader instance to decode the barcode
-     * @param hints Holds the hints the user sets for the Reader.
-     */
-    constructor(reader, hints = new Map(), options = {}) {
-        this.reader = reader;
-        this.hints = hints;
-        this.options = { ...defaultOptions, ...options };
-    }
-    /**
      * Gets the BinaryBitmap for ya! (and decodes it)
      */
     decode(element) {
@@ -477,34 +489,38 @@ export class BrowserCodeReader {
     /**
      * Decodes something from an image HTML element.
      */
-    async decodeFromImageElement(source) {
-        if (!source) {
-            throw new ArgumentException('An image element must be provided.');
-        }
-        const element = BrowserCodeReader.prepareImageElement(source);
-        // onLoad will remove it's callback once done
-        // we do not need to dispose or destroy the image
-        // since it came from the user
-        return await this._decodeOnLoadImage(element);
+    decodeFromImageElement(source) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!source) {
+                throw new ArgumentException('An image element must be provided.');
+            }
+            const element = BrowserCodeReader.prepareImageElement(source);
+            // onLoad will remove it's callback once done
+            // we do not need to dispose or destroy the image
+            // since it came from the user
+            return yield this._decodeOnLoadImage(element);
+        });
     }
     /**
      * Decodes an image from a URL.
      */
-    async decodeFromImageUrl(url) {
-        if (!url) {
-            throw new ArgumentException('An URL must be provided.');
-        }
-        const element = BrowserCodeReader.prepareImageElement();
-        // loads the image.
-        element.src = url;
-        try {
-            // it waits the task so we can destroy the created image after
-            return await this.decodeFromImageElement(element);
-        }
-        finally {
-            // we created this element, so we destroy it
-            BrowserCodeReader.destroyImageElement(element);
-        }
+    decodeFromImageUrl(url) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!url) {
+                throw new ArgumentException('An URL must be provided.');
+            }
+            const element = BrowserCodeReader.prepareImageElement();
+            // loads the image.
+            element.src = url;
+            try {
+                // it waits the task so we can destroy the created image after
+                return yield this.decodeFromImageElement(element);
+            }
+            finally {
+                // we created this element, so we destroy it
+                BrowserCodeReader.destroyImageElement(element);
+            }
+        });
     }
     /**
      * Continuously tries to decode the barcode from a stream obtained from the given constraints
@@ -515,16 +531,18 @@ export class BrowserCodeReader {
      *  decoding. Can be either an element id or directly an HTMLVideoElement. Can be undefined, in
      *  which case no video will be shown.
      */
-    async decodeFromConstraints(constraints, previewElem, callbackFn) {
-        BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
-        const stream = await this.getUserMedia(constraints);
-        try {
-            return await this.decodeFromStream(stream, previewElem, callbackFn);
-        }
-        catch (error) {
-            BrowserCodeReader.disposeMediaStream(stream);
-            throw error;
-        }
+    decodeFromConstraints(constraints, previewElem, callbackFn) {
+        return __awaiter(this, void 0, void 0, function* () {
+            BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
+            const stream = yield this.getUserMedia(constraints);
+            try {
+                return yield this.decodeFromStream(stream, previewElem, callbackFn);
+            }
+            catch (error) {
+                BrowserCodeReader.disposeMediaStream(stream);
+                throw error;
+            }
+        });
     }
     /**
      * In one attempt, tries to decode the barcode from a stream obtained from the given constraints
@@ -535,56 +553,58 @@ export class BrowserCodeReader {
      *  while decoding. Can be either an element id or directly an HTMLVideoElement. Can be undefined,
      *  in which case no video will be shown.
      */
-    async decodeFromStream(stream, preview, callbackFn) {
-        BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
-        const timeout = this.options.tryPlayVideoTimeout;
-        const video = await BrowserCodeReader.attachStreamToVideo(stream, preview, timeout);
-        // IF we receive a stream from the user, it's not our job to dispose it
-        const finalizeCallback = () => {
-            // stops video tracks and releases the stream reference
-            BrowserCodeReader.disposeMediaStream(stream);
-            // this video was just a preview, so in order
-            // to release the stream we gotta stop showing
-            // it (the stream) in the video element
-            BrowserCodeReader.cleanVideoSource(video);
-        };
-        const originalControls = this.scan(video, callbackFn, finalizeCallback);
-        const videoTracks = stream.getVideoTracks();
-        const controls = {
-            ...originalControls,
-            stop() {
-                originalControls.stop();
-            },
-            async streamVideoConstraintsApply(constraints, trackFilter) {
-                const tracks = trackFilter ? videoTracks.filter(trackFilter) : videoTracks;
-                for (const track of tracks) {
-                    await track.applyConstraints(constraints);
+    decodeFromStream(stream, preview, callbackFn) {
+        return __awaiter(this, void 0, void 0, function* () {
+            BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
+            const timeout = this.options.tryPlayVideoTimeout;
+            const video = yield BrowserCodeReader.attachStreamToVideo(stream, preview, timeout);
+            // IF we receive a stream from the user, it's not our job to dispose it
+            const finalizeCallback = () => {
+                // stops video tracks and releases the stream reference
+                BrowserCodeReader.disposeMediaStream(stream);
+                // this video was just a preview, so in order
+                // to release the stream we gotta stop showing
+                // it (the stream) in the video element
+                BrowserCodeReader.cleanVideoSource(video);
+            };
+            const originalControls = this.scan(video, callbackFn, finalizeCallback);
+            const videoTracks = stream.getVideoTracks();
+            const controls = Object.assign(Object.assign({}, originalControls), {
+                stop() {
+                    originalControls.stop();
+                },
+                streamVideoConstraintsApply(constraints, trackFilter) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        const tracks = trackFilter ? videoTracks.filter(trackFilter) : videoTracks;
+                        for (const track of tracks) {
+                            yield track.applyConstraints(constraints);
+                        }
+                    });
+                },
+                streamVideoConstraintsGet(trackFilter) {
+                    return videoTracks.find(trackFilter).getConstraints();
+                },
+                streamVideoSettingsGet(trackFilter) {
+                    return videoTracks.find(trackFilter).getSettings();
+                },
+                streamVideoCapabilitiesGet(trackFilter) {
+                    return videoTracks.find(trackFilter).getCapabilities();
                 }
-            },
-            streamVideoConstraintsGet(trackFilter) {
-                return videoTracks.find(trackFilter).getConstraints();
-            },
-            streamVideoSettingsGet(trackFilter) {
-                return videoTracks.find(trackFilter).getSettings();
-            },
-            streamVideoCapabilitiesGet(trackFilter) {
-                return videoTracks.find(trackFilter).getCapabilities();
-            },
-        };
-        const isTorchAvailable = BrowserCodeReader.mediaStreamIsTorchCompatible(stream);
-        if (isTorchAvailable) {
-            const torchTrack = videoTracks
-                ?.find((t) => BrowserCodeReader.mediaStreamIsTorchCompatibleTrack(t));
-            const switchTorch = async (onOff) => {
-                await BrowserCodeReader.mediaStreamSetTorch(torchTrack, onOff);
-            };
-            controls.switchTorch = switchTorch;
-            controls.stop = async () => {
-                originalControls.stop();
-                await switchTorch(false);
-            };
-        }
-        return controls;
+            });
+            const isTorchAvailable = BrowserCodeReader.mediaStreamIsTorchCompatible(stream);
+            if (isTorchAvailable) {
+                const torchTrack = videoTracks === null || videoTracks === void 0 ? void 0 : videoTracks.find((t) => BrowserCodeReader.mediaStreamIsTorchCompatibleTrack(t));
+                const switchTorch = (onOff) => __awaiter(this, void 0, void 0, function* () {
+                    yield BrowserCodeReader.mediaStreamSetTorch(torchTrack, onOff);
+                });
+                controls.switchTorch = switchTorch;
+                controls.stop = () => __awaiter(this, void 0, void 0, function* () {
+                    originalControls.stop();
+                    yield switchTorch(false);
+                });
+            }
+            return controls;
+        });
     }
     /**
      * Continuously tries to decode the barcode from the device specified by device while showing
@@ -597,56 +617,62 @@ export class BrowserCodeReader {
      *  while decoding. Can be either an element id or directly an HTMLVideoElement. Can be undefined,
      *  in which case no video will be shown.
      */
-    async decodeFromVideoDevice(deviceId, previewElem, callbackFn) {
-        BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
-        let videoConstraints;
-        if (!deviceId) {
-            videoConstraints = { facingMode: 'environment' };
-        }
-        else {
-            videoConstraints = { deviceId: { exact: deviceId } };
-        }
-        const constraints = { video: videoConstraints };
-        return await this.decodeFromConstraints(constraints, previewElem, callbackFn);
+    decodeFromVideoDevice(deviceId, previewElem, callbackFn) {
+        return __awaiter(this, void 0, void 0, function* () {
+            BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
+            let videoConstraints;
+            if (!deviceId) {
+                videoConstraints = { facingMode: 'environment' };
+            }
+            else {
+                videoConstraints = { deviceId: { exact: deviceId } };
+            }
+            const constraints = { video: videoConstraints };
+            return yield this.decodeFromConstraints(constraints, previewElem, callbackFn);
+        });
     }
     /**
      * Decodes something from an image HTML element.
      */
-    async decodeFromVideoElement(source, callbackFn) {
-        BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
-        if (!source) {
-            throw new ArgumentException('A video element must be provided.');
-        }
-        // we do not create a video element
-        const element = BrowserCodeReader.prepareVideoElement(source);
-        const timeout = this.options.tryPlayVideoTimeout;
-        // plays the video
-        await BrowserCodeReader.playVideoOnLoadAsync(element, timeout);
-        // starts decoding after played the video
-        return this.scan(element, callbackFn);
+    decodeFromVideoElement(source, callbackFn) {
+        return __awaiter(this, void 0, void 0, function* () {
+            BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
+            if (!source) {
+                throw new ArgumentException('A video element must be provided.');
+            }
+            // we do not create a video element
+            const element = BrowserCodeReader.prepareVideoElement(source);
+            const timeout = this.options.tryPlayVideoTimeout;
+            // plays the video
+            yield BrowserCodeReader.playVideoOnLoadAsync(element, timeout);
+            // starts decoding after played the video
+            return this.scan(element, callbackFn);
+        });
     }
     /**
      * Decodes a video from a URL until it ends.
      */
-    async decodeFromVideoUrl(url, callbackFn) {
-        BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
-        if (!url) {
-            throw new ArgumentException('An URL must be provided.');
-        }
-        // creates a new element
-        const element = BrowserCodeReader.prepareVideoElement();
-        // starts loading the video
-        element.src = url;
-        const finalizeCallback = () => {
-            // dispose created video element
-            BrowserCodeReader.cleanVideoSource(element);
-        };
-        const timeout = this.options.tryPlayVideoTimeout;
-        // plays the video
-        await BrowserCodeReader.playVideoOnLoadAsync(element, timeout);
-        // starts decoding after played the video
-        const controls = this.scan(element, callbackFn, finalizeCallback);
-        return controls;
+    decodeFromVideoUrl(url, callbackFn) {
+        return __awaiter(this, void 0, void 0, function* () {
+            BrowserCodeReader.checkCallbackFnOrThrow(callbackFn);
+            if (!url) {
+                throw new ArgumentException('An URL must be provided.');
+            }
+            // creates a new element
+            const element = BrowserCodeReader.prepareVideoElement();
+            // starts loading the video
+            element.src = url;
+            const finalizeCallback = () => {
+                // dispose created video element
+                BrowserCodeReader.cleanVideoSource(element);
+            };
+            const timeout = this.options.tryPlayVideoTimeout;
+            // plays the video
+            yield BrowserCodeReader.playVideoOnLoadAsync(element, timeout);
+            // starts decoding after played the video
+            const controls = this.scan(element, callbackFn, finalizeCallback);
+            return controls;
+        });
     }
     /**
      * In one attempt, tries to decode the barcode from a stream obtained from the given
@@ -658,9 +684,11 @@ export class BrowserCodeReader {
      *  in which case no video will be shown.
      *  The decoding result.
      */
-    async decodeOnceFromConstraints(constraints, videoSource) {
-        const stream = await this.getUserMedia(constraints);
-        return await this.decodeOnceFromStream(stream, videoSource);
+    decodeOnceFromConstraints(constraints, videoSource) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const stream = yield this.getUserMedia(constraints);
+            return yield this.decodeOnceFromStream(stream, videoSource);
+        });
     }
     /**
      * In one attempt, tries to decode the barcode from a stream obtained from the given
@@ -671,18 +699,20 @@ export class BrowserCodeReader {
      *  Can be either an element id or directly an HTMLVideoElement. Can be undefined,
      *  in which case no video will be shown.
      */
-    async decodeOnceFromStream(stream, preview) {
-        const receivedPreview = Boolean(preview);
-        const video = await BrowserCodeReader.attachStreamToVideo(stream, preview);
-        try {
-            const result = await this.scanOneResult(video);
-            return result;
-        }
-        finally {
-            if (!receivedPreview) {
-                BrowserCodeReader.cleanVideoSource(video);
+    decodeOnceFromStream(stream, preview) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const receivedPreview = Boolean(preview);
+            const video = yield BrowserCodeReader.attachStreamToVideo(stream, preview);
+            try {
+                const result = yield this.scanOneResult(video);
+                return result;
             }
-        }
+            finally {
+                if (!receivedPreview) {
+                    BrowserCodeReader.cleanVideoSource(video);
+                }
+            }
+        });
     }
     /**
      * In one attempt, tries to decode the barcode from the device specified by deviceId
@@ -695,52 +725,58 @@ export class BrowserCodeReader {
      *  Can be either an element id or directly an HTMLVideoElement. Can be undefined,
      *  in which case no video will be shown.
      */
-    async decodeOnceFromVideoDevice(deviceId, videoSource) {
-        let videoConstraints;
-        if (!deviceId) {
-            videoConstraints = { facingMode: 'environment' };
-        }
-        else {
-            videoConstraints = { deviceId: { exact: deviceId } };
-        }
-        const constraints = { video: videoConstraints };
-        return await this.decodeOnceFromConstraints(constraints, videoSource);
+    decodeOnceFromVideoDevice(deviceId, videoSource) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let videoConstraints;
+            if (!deviceId) {
+                videoConstraints = { facingMode: 'environment' };
+            }
+            else {
+                videoConstraints = { deviceId: { exact: deviceId } };
+            }
+            const constraints = { video: videoConstraints };
+            return yield this.decodeOnceFromConstraints(constraints, videoSource);
+        });
     }
     /**
      * Decodes something from an image HTML element.
      */
-    async decodeOnceFromVideoElement(source) {
-        if (!source) {
-            throw new ArgumentException('A video element must be provided.');
-        }
-        // we do not create a video element
-        const element = BrowserCodeReader.prepareVideoElement(source);
-        const timeout = this.options.tryPlayVideoTimeout;
-        // plays the video
-        await BrowserCodeReader.playVideoOnLoadAsync(element, timeout);
-        // starts decoding after played the video
-        return await this.scanOneResult(element);
+    decodeOnceFromVideoElement(source) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!source) {
+                throw new ArgumentException('A video element must be provided.');
+            }
+            // we do not create a video element
+            const element = BrowserCodeReader.prepareVideoElement(source);
+            const timeout = this.options.tryPlayVideoTimeout;
+            // plays the video
+            yield BrowserCodeReader.playVideoOnLoadAsync(element, timeout);
+            // starts decoding after played the video
+            return yield this.scanOneResult(element);
+        });
     }
     /**
      * Decodes a video from a URL.
      */
-    async decodeOnceFromVideoUrl(url) {
-        if (!url) {
-            throw new ArgumentException('An URL must be provided.');
-        }
-        // creates a new element
-        const element = BrowserCodeReader.prepareVideoElement();
-        // starts loading the video
-        element.src = url;
-        const task = this.decodeOnceFromVideoElement(element);
-        try {
-            // it waits the task so we can destroy the created image after
-            return await task;
-        }
-        finally {
-            // we created this element, so we destroy it
-            BrowserCodeReader.cleanVideoSource(element);
-        }
+    decodeOnceFromVideoUrl(url) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!url) {
+                throw new ArgumentException('An URL must be provided.');
+            }
+            // creates a new element
+            const element = BrowserCodeReader.prepareVideoElement();
+            // starts loading the video
+            element.src = url;
+            const task = this.decodeOnceFromVideoElement(element);
+            try {
+                // it waits the task so we can destroy the created image after
+                return yield task;
+            }
+            finally {
+                // we created this element, so we destroy it
+                BrowserCodeReader.cleanVideoSource(element);
+            }
+        });
     }
     /**
      * Tries to decode from the video input until it finds some value.
@@ -789,7 +825,13 @@ export class BrowserCodeReader {
         /**
          * The HTML canvas element context.
          */
-        let captureCanvasContext = captureCanvas.getContext('2d',{ willReadFrequently: true });
+        let captureCanvasContext;
+        try {
+            captureCanvasContext = captureCanvas.getContext('2d', { willReadFrequently: true });
+        }
+        catch (e) {
+            captureCanvasContext = captureCanvas.getContext('2d');
+        }
         // cannot proceed w/o this
         if (!captureCanvasContext) {
             throw new Error('Couldn\'t create canvas for visual element scan.');
@@ -847,21 +889,30 @@ export class BrowserCodeReader {
     /**
      * Waits for the image to load and then tries to decode it.
      */
-    async _decodeOnLoadImage(element) {
-        const isImageLoaded = BrowserCodeReader.isImageLoaded(element);
-        if (!isImageLoaded) {
-            await BrowserCodeReader._waitImageLoad(element);
-        }
-        return this.decode(element);
+    _decodeOnLoadImage(element) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const isImageLoaded = BrowserCodeReader.isImageLoaded(element);
+            if (!isImageLoaded) {
+                yield BrowserCodeReader._waitImageLoad(element);
+            }
+            return this.decode(element);
+        });
     }
     /**
      * Get MediaStream from browser to be used.
      * @param constraints constraints the media stream constraints to get s valid media stream to decode from.
      * @private For private use.
      */
-    async getUserMedia(constraints) {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        BrowserCodeReader.streamTracker.push(stream);
-        return stream;
+    getUserMedia(constraints) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const stream = yield navigator.mediaDevices.getUserMedia(constraints);
+            BrowserCodeReader.streamTracker.push(stream);
+            return stream;
+        });
     }
 }
+/**
+ * Keeps track to created media streams.
+ * @private there is no need this array to be accessible from outside.
+ */
+BrowserCodeReader.streamTracker = [];

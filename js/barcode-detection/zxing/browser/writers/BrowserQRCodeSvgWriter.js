@@ -6,7 +6,6 @@ import QRCodeEncoder from '../../core/qrcode/encoder/Encoder.js';
 const svgNs = 'http://www.w3.org/2000/svg';
 /**/
 class BrowserQRCodeSvgWriter {
-    static QUIET_ZONE_SIZE = 4;
     /**
      * Writes and renders a QRCode SVG element.
      *
@@ -122,4 +121,5 @@ class BrowserQRCodeSvgWriter {
         return rect;
     }
 }
+BrowserQRCodeSvgWriter.QUIET_ZONE_SIZE = 4;
 export { BrowserQRCodeSvgWriter };
