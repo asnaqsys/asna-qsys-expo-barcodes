@@ -33,8 +33,24 @@
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" stroke="%23000" stroke-linecap="round" stroke-linejoin="round" fill="%23fff" fill-rule="evenodd"><path d="M.2501 2.5L.25.2501 2.75.25M17.7499 2.5L17.75.2501 15.25.25m-14.9999 15L.25 17.4999l2.5.0001m12.75-.0001l2.2499.0001.0001-2.5" fill="none" stroke-linecap="square" stroke-linejoin="miter" stroke-width=".5"/><path d="M1 8.7501h12.3855L17 8.75" fill="red" stroke="red"/></svg>');
     background-repeat: no-repeat;
     background-size: 100% 100%;
-    width:100%;
+    width: 100%;
 }
+
+.dds-field-barcode-video-frame:focus {
+    scroll-margin-top: 0px; /* Used by scrollIntoView function */
+    outline: none;
+}
+
+/*
+    For websites with ASPX pages and absolute positioned elements, use the following style (cascading the default style - the one with background-image above -).
+
+    .dds-field-barcode-video-frame {
+        position: absolute;
+        left:0px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+*/
 
 .dds-field-barcode-video-containter {
     display: flex;

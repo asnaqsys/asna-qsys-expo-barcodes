@@ -172,8 +172,13 @@ class Barcodes {
 
     static async decodeFromVideoDevice(codeReader, selectedDeviceId, videoElement, form, targetInput ) {
         return await codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, error, controls) => {
-            if ( result ) {
-                targetInput.setAttribute('value', result.text);
+            if (result) {
+                let scanText = result.text;
+                const maxLength = targetInput.getAttribute('maxlength');
+                if (maxLength && scanText.length > maxLength) {
+                    scanText = scanText.substring(0, scanText);
+                }
+                targetInput.setAttribute('value', scanText);
                 const audio = new Audio('/lib/asna-expo/audio/barcode-identified-alarm.mp3');
                 audio.play();
                 Barcodes.scanEnd(controls, form);
@@ -202,6 +207,7 @@ class Barcodes {
 
         const scanFrame = document.createElement('div');
         scanFrame.className = 'dds-field-barcode-video-frame';
+        scanFrame.tabIndex = '0'; // Make it focusable (so that dds-field-barcode-video-frame:focus can be applied.)
 
         const scanContainer = document.createElement('div');
         scanContainer.className = 'dds-field-barcode-video-containter';
@@ -224,6 +230,7 @@ class Barcodes {
         }
         else {
             form.appendChild(scanFrame);
+            scanFrame.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         const codeReader = Barcodes.createCodeReader(hintFormats);
