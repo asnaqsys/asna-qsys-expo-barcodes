@@ -89,7 +89,8 @@ class Barcodes {
             inputField.setAttribute('disabled', true);
         }
         else {
-            btnScan._asna = { input: inputField, hints: options.HintFormats, timeout: options.scanningTimeoutSeconds };
+            const hintsMap = Barcodes.barcodeOptionsToZxingHintMap(options);
+            btnScan._asna = { input: inputField, hints: hintsMap, timeout: options.scanningTimeoutSeconds };
             btnScan.addEventListener('click', Barcodes.handleScanButtonClick);
         }
 
@@ -97,6 +98,33 @@ class Barcodes {
         div.appendChild(btnScan);
 
         input.parentNode.replaceChild(div, input); // Note: input will be destroyed during DOM's garbage collection.
+    }
+
+    static barcodeOptionsToZxingHintMap(options) {
+        const hintsMap = new Map();
+        if (options.possibleFormats) {
+            hintsMap.set(DecodeHintType.POSSIBLE_FORMATS, options.possibleFormats);
+        }
+        hintsMap.set(DecodeHintType.TRY_HARDER, options.tryHarder);
+        hintsMap.set(DecodeHintType.PURE_BARCODE, options.pureBarcode);
+
+        if (options.characterSet) {
+            hintsMap.set(DecodeHintType.CHARACTER_SET);
+        }
+
+        if (options.allowedLengths) {
+            hintsMap.set(DecodeHintType.ALLOWED_LENGTHS, options.allowedLengths);
+        }
+
+        hintsMap.set(DecodeHintType.ASSUME_CODE_39_CHECK_DIGIT, options.assumeCode39CheckDigit);
+        hintsMap.set(DecodeHintType.ENABLE_CODE_39_EXTENDED_MODE, options.enableCode39ExtendedMode);
+        hintsMap.set(DecodeHintType.ASSUME_GS1, options.assumeGS1);
+        hintsMap.set(DecodeHintType.RETURN_CODABAR_START_END, options.returnCodabarStartEnd);
+
+        if (options.allowedEAN_Extensions) {
+            hintsMap.set(DecodeHintType.ALLOWED_EAN_EXTENSIONS, options.allowedEAN_Extensions);
+        }
+        return hintsMap;
     }
 
     static copyNonInputAttributes(target, source) {
@@ -198,7 +226,7 @@ class Barcodes {
         }
 
         const targetInput = btn._asna.input;
-        const hintFormats = btn._asna.hints;
+        const hintsMap = btn._asna.hints;
         const timeoutSeconds = (typeof btn._asna.timeout === 'undefined') ?
             DEFAULT_SCANNING_TIMEOUT_SECONDS :
             btn._asna.timeout;
@@ -233,7 +261,7 @@ class Barcodes {
             scanFrame.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        const codeReader = Barcodes.createCodeReader(hintFormats);
+        const codeReader = Barcodes.createCodeReader(hintsMap);
         Barcodes.listVideoInputDevices().then(
             (videoDevices) => {
                 if (!videoDevices || !videoDevices.length) {
@@ -277,52 +305,48 @@ class Barcodes {
         });
     }
 
-    static createCodeReader(hintFormats) {
-        if (!hintFormats || hintFormats.length === 0) {
+    static createCodeReader(hintsMap) {
+        if (!hintsMap || hintsMap.length === 0) {  // No hints: use defaults and look for ANY barcode format. (Slow)
             return new BrowserMultiFormatReader();
         }
 
-        const hintsMap = new Map();
+        const possibleFormats = hintsMap.get(DecodeHintType.POSSIBLE_FORMATS);
+        if (!possibleFormats || possibleFormats.length > 1) { // No possible formats or more than one barcode format. Use the given possible formats (or ANY).
+            return new BrowserMultiFormatReader(hintsMap);
+        }
 
-        hintsMap.set(DecodeHintType.POSSIBLE_FORMATS, hintFormats);
-        // hintsMap.set(DecodeHintType.TRY_HARDER, true);
-
-        if (hintFormats.includes(BarcodeFormat.AZTEC)) {
+        if (possibleFormats.includes(BarcodeFormat.AZTEC)) { // Only AZTEC barcode format. (Fast)
             return new BrowserAztecCodeReader(hintsMap);
         }
 
-        if (hintFormats.includes(BarcodeFormat.DATA_MATRIX)) {
+        if (possibleFormats.includes(BarcodeFormat.DATA_MATRIX)) { // Only DATA_MATRIX barcode format. (Fast)
             return new BrowserDatamatrixCodeReader(hintsMap);
         }
 
-        if (hintFormats.includes(BarcodeFormat.CODABAR) ||
-            hintFormats.includes(BarcodeFormat.CODE_39) || 
-            hintFormats.includes(BarcodeFormat.CODE_93) || 
-            hintFormats.includes(BarcodeFormat.CODE_128) || 
-            hintFormats.includes(BarcodeFormat.EAN_8) ||
-            hintFormats.includes(BarcodeFormat.EAN_13) ||
-            hintFormats.includes(BarcodeFormat.ITF) || 
-            hintFormats.includes(BarcodeFormat.RSS_14) || 
-            hintFormats.includes(BarcodeFormat.RSS_EXPANDED) ||
-            hintFormats.includes(BarcodeFormat.UPC_A) || 
-            hintFormats.includes(BarcodeFormat.UPC_E) || 
-            hintFormats.includes(BarcodeFormat.UPC_EAN_EXTENSION)) {
-            return new BrowserMultiFormatOneDReader(hintsMap);
+        if (possibleFormats.includes(BarcodeFormat.CODABAR) ||
+            possibleFormats.includes(BarcodeFormat.CODE_39) || 
+            possibleFormats.includes(BarcodeFormat.CODE_93) || 
+            possibleFormats.includes(BarcodeFormat.CODE_128) || 
+            possibleFormats.includes(BarcodeFormat.EAN_8) ||
+            possibleFormats.includes(BarcodeFormat.EAN_13) ||
+            possibleFormats.includes(BarcodeFormat.ITF) || 
+            possibleFormats.includes(BarcodeFormat.RSS_14) || 
+            possibleFormats.includes(BarcodeFormat.RSS_EXPANDED) ||
+            possibleFormats.includes(BarcodeFormat.UPC_A) || 
+            possibleFormats.includes(BarcodeFormat.UPC_E) || 
+            possibleFormats.includes(BarcodeFormat.UPC_EAN_EXTENSION)) {
+            return new BrowserMultiFormatOneDReader(hintsMap); // Any One Dimensional Barcode format.
         }
 
-        if (hintFormats.includes(BarcodeFormat.DATA_MATRIX)) {
-            return new BrowserDatamatrixCodeReader(hintsMap);
-        }
-
-        if (hintFormats.includes(BarcodeFormat.QR_CODE)) {
+        if (possibleFormats.includes(BarcodeFormat.QR_CODE)) { // Only QR-CODE Barcode format.
             return new BrowserQRCodeReader(hintsMap);
         }
 
-        if (hintFormats.includes(BarcodeFormat.PDF_417)) {
+        if (possibleFormats.includes(BarcodeFormat.PDF_417)) { // Only PDF-417 Barcode format.
             return new BrowserPDF417Reader(hintsMap);
         }
 
-        return new BrowserMultiFormatReader(hintsMap);
+        return new BrowserMultiFormatReader(hintsMap); // Unexpected (possible format). Try ANY (good-luck!).
     }
 
     static scanEnd( videoControls, form) {
