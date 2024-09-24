@@ -157,7 +157,7 @@ For the [ASPX Pages](https://learn.microsoft.com/en-us/previous-versions/aspnet/
     }
 </style>
 ```
->Note: If more than one Page will contain **Barcode Reader Web controls**, this style can be added to the [ASPX MasterPage](https://learn.microsoft.com/en-us/previous-versions/aspnet/wtxbf3hh(v=vs.100)) or to the user-define `site.css` that the Application uses to deine the Application global style.
+>Note: If more than one Page will contain **Barcode Reader Web controls**, this style can be added to the [ASPX MasterPage](https://learn.microsoft.com/en-us/previous-versions/aspnet/wtxbf3hh(v=vs.100)) or to the user-defined `site.css` that the Application uses to define the Application global style.
 
 For the [ASPX Pages](https://learn.microsoft.com/en-us/previous-versions/aspnet/dd566231(v=vs.140)) that will contain [Barcode Reader Web Controls](https://docs.asna.com/documentation/Help170/MonarchFX/_HTML/amfUnderstandingBarcodes.htm) the script reference should be added at the end of the Page:
 
