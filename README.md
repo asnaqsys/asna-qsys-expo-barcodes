@@ -102,9 +102,9 @@ the `_Layout.cshtml` file needs to be updated.
 
 ### B. [Monarch Framework 11.1](https://docs.asna.com/documentation/Help170/MonarchFX/_HTML/amfUnderstandingBarcodes.htm) Clients.  
 
-Applications using Monarch Monarch Framework 11.1 do not use the [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0) we content delivery meachnism (rather use JavaScript injected at runtime stored in the `WebDspf.dll` assembly *as static resources* ).
+Applications using Monarch Monarch Framework 11.1 do not use the [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0) Web-content delivery mechanism (rather use JavaScript injected at runtime stored in the `WebDspf.dll` assembly *as static resources* ).
 
-To enable [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0), create a new textfile (extension.json) at the root of the Website project in Visual Studio 2022 (or later). Add the following contents to this new file:
+To enable [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0), create a new text-file (extension.json) at the root of the Website project in Visual Studio 2022 (or later). Add the following contents to this new file:
 
 `Libman.json:`
 
