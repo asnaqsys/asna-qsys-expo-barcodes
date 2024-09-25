@@ -90,7 +90,9 @@ class Barcodes {
         }
         else {
             const hintsMap = Barcodes.barcodeOptionsToZxingHintMap(options);
-            btnScan._asna = { input: inputField, hints: hintsMap, timeout: options.scanningTimeoutSeconds };
+            btnScan._asna = {
+                input: inputField, hints: hintsMap, timeout: options.scanningTimeoutSeconds, aidKey: options.pushKeyAfterCodeDetected
+            };
             btnScan.addEventListener('click', Barcodes.handleScanButtonClick);
         }
 
@@ -102,28 +104,16 @@ class Barcodes {
 
     static barcodeOptionsToZxingHintMap(options) {
         const hintsMap = new Map();
-        if (options.possibleFormats) {
-            hintsMap.set(DecodeHintType.POSSIBLE_FORMATS, options.possibleFormats);
-        }
-        hintsMap.set(DecodeHintType.TRY_HARDER, options.tryHarder);
-        hintsMap.set(DecodeHintType.PURE_BARCODE, options.pureBarcode);
-
-        if (options.characterSet) {
-            hintsMap.set(DecodeHintType.CHARACTER_SET);
-        }
-
-        if (options.allowedLengths) {
-            hintsMap.set(DecodeHintType.ALLOWED_LENGTHS, options.allowedLengths);
-        }
-
-        hintsMap.set(DecodeHintType.ASSUME_CODE_39_CHECK_DIGIT, options.assumeCode39CheckDigit);
-        hintsMap.set(DecodeHintType.ENABLE_CODE_39_EXTENDED_MODE, options.enableCode39ExtendedMode);
-        hintsMap.set(DecodeHintType.ASSUME_GS1, options.assumeGS1);
-        hintsMap.set(DecodeHintType.RETURN_CODABAR_START_END, options.returnCodabarStartEnd);
-
-        if (options.allowedEAN_Extensions) {
-            hintsMap.set(DecodeHintType.ALLOWED_EAN_EXTENSIONS, options.allowedEAN_Extensions);
-        }
+        if (options.hintPossibleFormats && options.hintPossibleFormats.length>0 ) { hintsMap.set(DecodeHintType.POSSIBLE_FORMATS, options.hintPossibleFormats); }
+        if (options.hintTryHarder) { hintsMap.set(DecodeHintType.TRY_HARDER, options.hintTryHarder); }
+        if (options.pureBarcode) { hintsMap.set(DecodeHintType.PURE_BARCODE, options.pureBarcode); }
+        if (options.hintCharacterSet) { hintsMap.set(DecodeHintType.CHARACTER_SET, options.hintCharacterSet); }
+        if (options.hintAllowedLengths && options.hintAllowedLengths.length>0) { hintsMap.set(DecodeHintType.ALLOWED_LENGTHS, options.hintAllowedLengths); }
+        if (options.hintAssumeCode39CheckDigit) { hintsMap.set(DecodeHintType.ASSUME_CODE_39_CHECK_DIGIT, options.hintAssumeCode39CheckDigit); }
+        if (options.hintEnableCode39ExtendedMode) { hintsMap.set(DecodeHintType.ENABLE_CODE_39_EXTENDED_MODE, options.hintEnableCode39ExtendedMode); }
+        if (options.hintAssumeGS1) { hintsMap.set(DecodeHintType.ASSUME_GS1, options.hintAssumeGS1); }
+        // Not used:  hintsMap.set(DecodeHintType.RETURN_CODABAR_START_END, ... );
+        if (options.hintAllowedEAN_Extensions && options.hintAllowedEAN_Extensions.length>0 ) { hintsMap.set(DecodeHintType.ALLOWED_EAN_EXTENSIONS, options.hintAllowedEAN_Extensions); }
         return hintsMap;
     }
 
