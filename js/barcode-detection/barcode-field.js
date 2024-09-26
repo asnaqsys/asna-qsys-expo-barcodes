@@ -18,7 +18,7 @@ const INPUT_ATTRIBUTES = [
     'autocomplete', 'autofocus', 'inputmode', 'maxlength', 'minlength', 'name', 'pattern', 'placeholder', 'required', 'size', 'tabindex', 'title', 'value', 'data-asna-position-cursor'
 ];
 
-const DEFAULT_SCANNING_TIMEOUT_SECONDS = 20;
+const DEFAULT_SCANNING_TIMEOUT_SECONDS = 120; // Two minutes.
 const SWITCH_VIDEO_CAMERA_WAIT = 250;
 
 class Barcodes {
@@ -91,7 +91,7 @@ class Barcodes {
         else {
             const hintsMap = Barcodes.barcodeOptionsToZxingHintMap(options);
             btnScan._asna = {
-                input: inputField, hints: hintsMap, timeout: options.scanningTimeoutSeconds, aidKey: options.pushKeyAfterCodeDetected
+                input: inputField, hints: hintsMap, timeout: options.scanningTimeoutSeconds, pushKey: options.pushKeyAfterDetection
             };
             btnScan.addEventListener('click', Barcodes.handleScanButtonClick);
         }
@@ -200,6 +200,12 @@ class Barcodes {
                 const audio = new Audio('/lib/asna-expo/audio/barcode-identified-alarm.mp3');
                 audio.play();
                 Barcodes.scanEnd(controls, form);
+
+                const pushKey = videoElement._asna ? videoElement._asna.pushKey : null;
+
+                if (!pushKey || !pushKey.aidKey ) { return; }
+
+                Barcodes.pushKey(pushKey);
             }
             else if ( controls ) {
                 if ( videoElement._asna && ! videoElement._asna.controls ) {
@@ -207,6 +213,30 @@ class Barcodes {
                 }
             }
         });
+    }
+
+    static pushKey(pushKey) {
+        if (window._00) { // Legacy JavaScript implementation (backward-compatibility)
+            const fwPushKeyFocus = window._01;
+            const fwPushKeyCursor = window._02;
+            const fwPushKeyField = window._03;
+
+            if (pushKey.vRowCol) {
+                if (pushKey.fmt) {
+                    fwPushKeyFocus(pushKey.aidKey, pushKey.fieldname, pushKey.vRowCol, pushKey.fmt);
+                } else {
+                    fwPushKeyCursor(pushKey.aidKey, pushKey.vRowCol);
+                }
+            } else {
+                fwPushKeyField(pushKey.aidKey, pushKey.fieldname);
+            }
+
+            return;
+        }
+
+        if (window.asnaExpo && window.asnaExpo.page && window.asnaExpo.page.pushKey) {
+            window.asnaExpo.page.pushKey(pushKey.aidKey, pushKey.fieldname, '', pushKey.vRowCol);
+        }
     }
 
     static scanStart(form, btn, preferredDeviceIndex ) {
@@ -276,7 +306,7 @@ class Barcodes {
                         deviceIndex = preferredDeviceIndex;
                     }
                     const selectedDeviceId = videoDevices[deviceIndex].deviceId;
-                    videoElement._asna = {};
+                    videoElement._asna = { pushKey: btn._asna.pushKey };
                     Barcodes.decodeFromVideoDevice(codeReader, selectedDeviceId, videoElement, form, targetInput);
 
                     if (timeoutSeconds > 0) {
