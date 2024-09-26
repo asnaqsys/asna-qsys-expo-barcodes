@@ -233,6 +233,10 @@ class Barcodes {
 
             return;
         }
+
+        if (window.asnaExpo && window.asnaExpo.page && window.asnaExpo.page.pushKey) {
+            window.asnaExpo.page.pushKey(pushKey.aidKey, pushKey.fieldname, '', pushKey.vRowCol);
+        }
     }
 
     static scanStart(form, btn, preferredDeviceIndex ) {
