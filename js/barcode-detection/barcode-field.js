@@ -149,13 +149,28 @@ class Barcodes {
     static handleScanButtonClick(e) {
         const target = e.target;
 
-        if (!target) { return };    
+        if (!target) { return };
 
-        let btn = (target.tagName === 'button' && target.className === 'button.dds-field-barcode-button' ) ? target :
+        const btn = (target.tagName === 'button' && target.className === 'button.dds-field-barcode-button') ? target :
             target.closest('button.dds-field-barcode-button');
-        if (!btn._asna || !btn._asna.input ) { return };    
+        if (!btn._asna || !btn._asna.input) { return };
 
-        const form = btn._asna.input.form;
+        const input = btn._asna.input; 
+        const form = input.form;
+
+        const audio = new Audio('/lib/asna-expo/audio/barcode-identified-alarm.mp3');
+        audio.load();
+        input._asna = { audio: { shouldPlay: false, intervalID: null } };
+        audio.addEventListener('canplaythrough', (event) => {
+            input._asna.audio.intervalID = setInterval(() => {
+                if (input._asna && input._asna.audio.shouldPlay) {
+                    audio.play();
+                    clearInterval(input._asna.audio.intervalID);
+                    input._asna.audio.intervalID = null;
+                }
+            }, 500);
+        });
+
         Barcodes.scanStart(form, btn, -1);
     }
 
@@ -174,7 +189,7 @@ class Barcodes {
         const controls = videoElement._asna.controls;
 
         if ( controls ) {
-            Barcodes.scanEnd(controls, form);
+            Barcodes.scanEnd(controls, form, scanBtn._asna.input);
             if ( index > 0 ) {
                 setTimeout( ()=> {
                     Barcodes.scanStart(form, scanBtn, index-1);                
@@ -197,9 +212,11 @@ class Barcodes {
                     scanText = scanText.substring(0, scanText);
                 }
                 targetInput.setAttribute('value', scanText);
-                const audio = new Audio('/lib/asna-expo/audio/barcode-identified-alarm.mp3');
-                audio.play();
-                Barcodes.scanEnd(controls, form);
+                if (targetInput._asna && targetInput._asna.audio) {
+                    targetInput._asna.audio.shouldPlay = true;
+                }
+
+                Barcodes.scanEnd(controls, form, null /* Note: we avoid passing targetInput: interval is cleared after playing */ );
 
                 const pushKey = videoElement._asna ? videoElement._asna.pushKey : null;
 
@@ -286,7 +303,7 @@ class Barcodes {
             (videoDevices) => {
                 if (!videoDevices || !videoDevices.length) {
                     alert('Failed to find video camera to start scanning.');
-                    Barcodes.scanEnd(null, form);
+                    Barcodes.scanEnd(null, form, btn._asna.input);
                 }
                 else {
                     toolboxControls.appendChild(Barcodes.createScanToolboxOption(form, btn, 0, 'x', 'Stop scan'));
@@ -312,7 +329,7 @@ class Barcodes {
                     if (timeoutSeconds > 0) {
                         videoElement._asna.scanTimeoutID = setTimeout(() => {
                             if (videoElement._asna.controls) {
-                                Barcodes.scanEnd(videoElement._asna.controls, form);
+                                Barcodes.scanEnd(videoElement._asna.controls, form, btn._asna.input);
                             }
                         },
                         timeoutSeconds * 1000);
@@ -320,7 +337,7 @@ class Barcodes {
                 }
             }
         ).catch((error)=>{
-            Barcodes.scanEnd(null, form);
+            Barcodes.scanEnd(null, form, btn._asna.input);
             alert(error);
         });
     }
@@ -369,7 +386,7 @@ class Barcodes {
         return new BrowserMultiFormatReader(hintsMap); // Unexpected (possible format). Try ANY (good-luck!).
     }
 
-    static scanEnd( videoControls, form) {
+    static scanEnd( videoControls, form, targetInput) {
         console.assert(form, 'Unexpected form null or undefined');
 
         if ( videoControls ) {
@@ -383,6 +400,11 @@ class Barcodes {
         }
         if (scanFrame && scanFrame.parentNode) {
             scanFrame.parentNode.removeChild(scanFrame);
+        }
+
+        if (targetInput && targetInput._asna && targetInput._asna.audio && targetInput._asna.audio.intervalID) {
+            clearInterval(targetInput._asna.audio.intervalID);
+            targetInput._asna.audio.intervalID = null;
         }
     }
 
