@@ -20,6 +20,7 @@ const INPUT_ATTRIBUTES = [
 
 const DEFAULT_SCANNING_TIMEOUT_SECONDS = 120; // Two minutes.
 const SWITCH_VIDEO_CAMERA_WAIT = 250;
+const AUDIO_INTERVAL = 500;
 
 class Barcodes {
     init(options) {
@@ -168,7 +169,7 @@ class Barcodes {
                     clearInterval(input._asna.audio.intervalID);
                     input._asna.audio.intervalID = null;
                 }
-            }, 500);
+            }, AUDIO_INTERVAL);
         });
 
         Barcodes.scanStart(form, btn, -1);
@@ -222,7 +223,9 @@ class Barcodes {
 
                 if (!pushKey || !pushKey.aidKey ) { return; }
 
-                Barcodes.pushKey(pushKey);
+                setTimeout(() => { // Wait for audio to play before submitting page.
+                    Barcodes.pushKey(pushKey);
+                }, AUDIO_INTERVAL + 100 );
             }
             else if ( controls ) {
                 if ( videoElement._asna && ! videoElement._asna.controls ) {
