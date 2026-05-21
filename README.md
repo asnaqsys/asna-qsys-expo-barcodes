@@ -36,7 +36,7 @@ The modified `libman.json` file looks like the following :
     },
     {
       "provider": "jsdelivr",
-      "library": "asnaqsys/asna-qsys-expo-barcodes@5.0.0",
+      "library": "asnaqsys/asna-qsys-expo-barcodes@5.0.1",
       "destination": "wwwroot/lib/asna-expo",
       "files": [
         "**/*", "!.github/**/*", "!css/*.min.*", "!js/*.min.*", "!js/**/*.min.*"
