@@ -104,6 +104,8 @@ the `_Layout.cshtml` file needs to be updated.
 
 Applications using Monarch Monarch Framework 11.1 do not use the [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0) Web-content delivery mechanism (rather use JavaScript injected at runtime stored in the `WebDspf.dll` assembly *as static resources* ).
 
+1. Enable libman.json.
+
 To enable [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0), create a new text-file (using file extension `.json`) at the root of the Website project in Visual Studio 2022 (or later). Add the following contents to this new file:
 
 `Libman.json:`
@@ -145,19 +147,34 @@ As soon as you save the new file, the `asna-qsys-expo-barcodes` web contents wil
 
 You can [Enable Restore on Build](https://devblogs.microsoft.com/dotnet/library-manager-client-side-content-manager-for-web-apps/) following the easy steps on this [link](https://devblogs.microsoft.com/dotnet/library-manager-client-side-content-manager-for-web-apps/).
 
-For the [ASPX Pages](https://learn.microsoft.com/en-us/previous-versions/aspnet/dd566231(v=vs.140)) that will contain [Barcode Reader Web Controls](https://docs.asna.com/documentation/Help170/MonarchFX/_HTML/amfUnderstandingBarcodes.htm) the following [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS) style `class` needs to be defined, to complete the style for the `camera video-frame viewer`, which will apear while the barcode is being scanned.
+2. Add a reference to the external stylesheet `barcodes.css`
 
-```css
-<style>
-    .dds-field-barcode-video-frame {
-        position: absolute;
-        left:0px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-</style>
+Wherever you include external stylesheet references ( typically in the [ASPX MasterPage](https://learn.microsoft.com/en-us/previous-versions/aspnet/wtxbf3hh(v=vs.100)) ):
+
+```html
+<head runat="server">
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <title>ASNA App</title>
+   <meta name="apple-mobile-web-app-capable" content="yes" />
+   <meta name="mobile-web-app-capable" content="yes">
+.
+.
+.
+   <link rel="stylesheet" type="text/css" href="~/Themes/Current/Styles/Framework.css">
+   <link rel="stylesheet" type="text/css" href="~/Themes/Current/Styles/Theme.css">
+
+   <link rel="stylesheet" type="text/css" href="~/lib/asna-expo/css/barcodes.css" />
+.
+.
+.
+</head>
 ```
->Note: If more than one Page will contain **Barcode Reader Web controls**, this style can be added to the [ASPX MasterPage](https://learn.microsoft.com/en-us/previous-versions/aspnet/wtxbf3hh(v=vs.100)) or to the user-defined `site.css` that the Application uses to define the Application global style.
+
+>Note: the new link element with href = "~/lib/asna-expo/css/barcodes.css".
+
+3. Add a small script to load the `JavaScript` module that implements the barcode detection logic.
+
 
 For the [ASPX Pages](https://learn.microsoft.com/en-us/previous-versions/aspnet/dd566231(v=vs.140)) that will contain [Barcode Reader Web Controls](https://docs.asna.com/documentation/Help170/MonarchFX/_HTML/amfUnderstandingBarcodes.htm) the script reference should be added at the end of the Page:
 
