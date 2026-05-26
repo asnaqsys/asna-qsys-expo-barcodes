@@ -35,8 +35,17 @@ class Barcodes {
             const encOptions = input.getAttribute(AsnaDataAttrName.DETECT_BARCODE);
             try {
                 const options = JSON.parse(Base64.decode(encOptions));
+                let targetCharField = '';
+                if (options.pushKeyAfterDetection) {
+                    const namePattern = `${options.pushKeyAfterDetection.fmt}_${options.pushKeyAfterDetection.fieldname}`;
+                    targetCharField = form.querySelector(`input.DdsCharField[name*="${namePattern}"]`);
+                }
+
                 input.removeAttribute(AsnaDataAttrName.DETECT_BARCODE);
-                Barcodes.createComponent(input, options);
+                Barcodes.createComponent(input, options, targetCharField);
+                if (targetCharField) {
+                    input.style.display = 'none'; 
+                }
             }
             catch (ex) {
                 // alert(ex);
@@ -44,9 +53,17 @@ class Barcodes {
         }        
     }
 
-    static createComponent(input, options){
+    static createComponent(input, options, targetCharField) {
         const div = document.createElement('div');
-        Barcodes.copyNonInputAttributes(div, input);
+        if (targetCharField) {
+            Barcodes.copyNonInputAttributes(div, targetCharField);
+            if (targetCharField.style.position && targetCharField.style.position.toLowerCase() === 'absolute') {
+                targetCharField.style.removeProperty('position');
+            }
+        }
+        else {
+            Barcodes.copyNonInputAttributes(div, input);
+        }
         div.className = 'dds-field-barcode-container';
 
         const btnScan = document.createElement('button');
@@ -55,7 +72,7 @@ class Barcodes {
 
         if (options.readOnly) {
             btnScan.setAttribute('disabled', true);
-        }        
+        }
 
         btnScan.innerHTML = `
 <svg class="dds-field-barcode-button-image" xmlns="http://www.w3.org/2000/svg" width="19" height="18" stroke="#000" stroke-linecap="round" stroke-linejoin="round" fill="#fff" fill-rule="evenodd">
@@ -81,15 +98,22 @@ class Barcodes {
     <path fill="red" d="M.5 8.7501h13.1595L17.5 8.75" stroke="red"/>
 </svg>`;
         
-        const inputField = document.createElement('input');
-        inputField.type = 'text';
-        inputField.className = 'dds-field-barcode-input';
-        Barcodes.copyInputAttributes(inputField,input);
+        // Use targetCharField if available, otherwise create a new input
+        let inputField;
+        if (targetCharField) {
+            inputField = targetCharField;
+        } else {
+            inputField = document.createElement('input');
+            inputField.type = 'text';
+            inputField.className = 'dds-field-barcode-input';
+            Barcodes.copyInputAttributes(inputField, input);
 
-        if (options.readOnly) {
-            inputField.setAttribute('disabled', true);
+            if (options.readOnly) {
+                inputField.setAttribute('disabled', true);
+            }
         }
-        else {
+
+        if (!options.readOnly) {
             const hintsMap = Barcodes.barcodeOptionsToZxingHintMap(options);
             btnScan._asna = {
                 input: inputField, hints: hintsMap, timeout: options.scanningTimeoutSeconds, pushKey: options.pushKeyAfterDetection
@@ -97,10 +121,16 @@ class Barcodes {
             btnScan.addEventListener('click', Barcodes.handleScanButtonClick);
         }
 
-        div.appendChild(inputField);
+        if (targetCharField) {
+            // Replace targetCharField in DOM with div FIRST, while targetCharField still has its original parentNode
+            targetCharField.parentNode.replaceChild(div, targetCharField);
+            // targetCharField is now detached — safely append it into div
+            div.appendChild(inputField);
+        } else {
+            div.appendChild(inputField);
+            input.parentNode.replaceChild(div, input);
+        }
         div.appendChild(btnScan);
-
-        input.parentNode.replaceChild(div, input); // Note: input will be destroyed during DOM's garbage collection.
     }
 
     static barcodeOptionsToZxingHintMap(options) {
