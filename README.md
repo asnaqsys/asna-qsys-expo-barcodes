@@ -104,6 +104,21 @@ the `_Layout.cshtml` file needs to be updated.
 
 Applications using Monarch Monarch Framework 11.1 do not use the [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0) Web-content delivery mechanism (rather use JavaScript injected at runtime stored in the `WebDspf.dll` assembly *as static resources* ).
 
+Here is a typical instance of DdsBarcode Web Control in an ASPX Page:
+
+```html
+<mdf:DdsBarcode ID="UNIQUE_ID_BARCODE" runat="server"
+    AidKey="Enter"
+    Usage="Both"
+    BarcodeFormat="Any"
+    ValueField="TARGET_FIELD"
+    ValueFieldLength="15" />
+```
+
+>Note: the `ValueField` and `ValueFieldLength` properties should match the names for the field that will receive the scanned barcode value and its length.
+
+STEPS TO UPDATE THE APPLICATION WEBSITE
+
 1. Enable libman.json.
 
 To enable [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/libman/libman-vs?view=aspnetcore-8.0), create a new text-file (using file extension `.json`) at the root of the Website project in Visual Studio 2022 (or later). Add the following contents to this new file:
@@ -142,6 +157,8 @@ To enable [libman](https://learn.microsoft.com/en-us/aspnet/core/client-side/lib
   ]
 }
 ```
+
+>Note: Use the latest release of `asnaqsys/asna-qsys-expo-barcodes` to get the correct implementation.
 
 As soon as you save the new file, the `asna-qsys-expo-barcodes` web contents will be [restored](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-restore) to your local file system.
 
